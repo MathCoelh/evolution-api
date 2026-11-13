@@ -201,6 +201,14 @@ export class ChatRouter extends RouterBroker {
 
         return res.status(HttpStatus.OK).json(response);
       })
+      // IT Squad: pares código (LID) ↔ telefone guardados localmente pela conexão
+      .post(this.routerPath('lidParaTelefone'), ...guards, async (req, res) => {
+        const instance = req.params as unknown as InstanceDto;
+        const lids = Array.isArray(req.body?.lids) ? req.body.lids.slice(0, 5000).map((l: unknown) => String(l)) : [];
+        const response = await chatController.lidParaTelefone(instance, lids);
+
+        return res.status(HttpStatus.OK).json(response);
+      })
       // Profile routes
       .post(this.routerPath('fetchBusinessProfile'), ...guards, async (req, res) => {
         const response = await this.dataValidate<ProfilePictureDto>({

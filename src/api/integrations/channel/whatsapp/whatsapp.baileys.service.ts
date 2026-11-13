@@ -4666,6 +4666,29 @@ export class BaileysStartupService extends ChannelStartupService {
     return obj;
   }
 
+  /**
+   * IT Squad: telefone de cada código (LID) pelo cadastro que a conexão guarda localmente
+   * (o WhatsApp manda esses pares ao parear e nas mensagens). Só lê o que já está guardado:
+   * não faz nenhum pedido ao WhatsApp.
+   */
+  public async lidParaTelefone(lids: string[]) {
+    const saida: { lid: string; fone: string }[] = [];
+    const repo = (this.client as any)?.signalRepository?.lidMapping;
+    if (!repo?.getPNForLID) return saida;
+    for (const item of lids || []) {
+      const digitos = String(item).split('@')[0].split(':')[0].replace(/\D/g, '');
+      if (digitos.length < 8 || digitos.length > 20) continue;
+      try {
+        const pn = await repo.getPNForLID(`${digitos}@lid`);
+        const fone = String(pn || '').split('@')[0].split(':')[0].replace(/\D/g, '');
+        if (fone.length >= 8) saida.push({ lid: digitos, fone });
+      } catch {
+        // sem par guardado para este código
+      }
+    }
+    return saida;
+  }
+
   private prepareMessage(message: proto.IWebMessageInfo): any {
     const contentType = getContentType(message.message);
     const contentMsg = message?.message[contentType] as any;

@@ -74,6 +74,13 @@ export class ChatController {
     return await this.waMonitor.waInstances[instanceName].findChatByRemoteJid(remoteJid);
   }
 
+  // IT Squad: telefone de cada código (LID) pelo cadastro local do WhatsApp (sem pedir nada ao WhatsApp)
+  public async lidParaTelefone({ instanceName }: InstanceDto, lids: string[]) {
+    const instancia = this.waMonitor.waInstances[instanceName];
+    if (typeof instancia?.lidParaTelefone !== 'function') return [];
+    return await instancia.lidParaTelefone(lids);
+  }
+
   public async sendPresence({ instanceName }: InstanceDto, data: SendPresenceDto) {
     return await this.waMonitor.waInstances[instanceName].sendPresence(data);
   }
