@@ -1067,6 +1067,21 @@ export class BaileysStartupService extends ChannelStartupService {
           );
         }
 
+        // IT Squad: o histórico traz o par código (LID) ↔ telefone de cada conversa
+        // (lidJid/pnJid). Repassa no webhook de contatos para o painel ligar as conversas.
+        const paresLid = contacts
+          .filter((c: any) => c?.id && (c.lid || c.phoneNumber))
+          .map((c: any) => ({
+            remoteJid: c.id,
+            pushName: c.name ?? c.notify ?? null,
+            lid: c.lid ?? null,
+            phoneNumber: c.phoneNumber ?? null,
+            instanceId: this.instanceId,
+          }));
+        if (paresLid.length > 0) {
+          this.sendDataWebhook(Events.CONTACTS_UPSERT, paresLid);
+        }
+
         await this.contactHandle['contacts.upsert'](
           contacts.filter((c) => !!c.notify || !!c.name).map((c) => ({ id: c.id, name: c.name ?? c.notify })),
         );
@@ -1476,6 +1491,8 @@ export class BaileysStartupService extends ChannelStartupService {
 
           sendTelemetry(`received.message.${messageRaw.messageType ?? 'unknown'}`);
           if (messageRaw.key.remoteJid?.includes('@lid') && messageRaw.key.remoteJidAlt) {
+            // IT Squad: guarda o código (LID) antes de trocar pelo telefone
+            (messageRaw.key as any).senderLid = messageRaw.key.remoteJid;
             messageRaw.key.remoteJid = messageRaw.key.remoteJidAlt;
           }
           console.log(messageRaw);
