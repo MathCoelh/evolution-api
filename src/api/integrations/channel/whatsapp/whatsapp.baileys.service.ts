@@ -4680,7 +4680,10 @@ export class BaileysStartupService extends ChannelStartupService {
       if (digitos.length < 8 || digitos.length > 20) continue;
       try {
         const pn = await repo.getPNForLID(`${digitos}@lid`);
-        const fone = String(pn || '').split('@')[0].split(':')[0].replace(/\D/g, '');
+        const fone = String(pn || '')
+          .split('@')[0]
+          .split(':')[0]
+          .replace(/\D/g, '');
         if (fone.length >= 8) saida.push({ lid: digitos, fone });
       } catch {
         // sem par guardado para este código
